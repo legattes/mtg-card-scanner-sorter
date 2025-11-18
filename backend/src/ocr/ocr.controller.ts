@@ -10,36 +10,26 @@ import {
   HttpStatus,
   Logger,
 } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { OcrService } from './ocr.service';
 import { OcrCalibrationService } from './ocr-calibration.service';
 import { OcrCalibrationResult } from '../domain/entities/ocr-calibration-result.entity';
 import { CalibrationService } from '../application/services/calibration.service';
 import { ExportService } from '../application/services/export.service';
+import { OcrRequestDto } from './dto/ocr-request.dto';
+import { OcrResponseDto } from './dto/ocr-response.dto';
+import { CalibrationFeedbackDto } from './dto/calibration-feedback.dto';
+import { CalibrationStatsDto } from './dto/calibration-stats.dto';
+import { StatsByTextDto } from './dto/stats-by-text.dto';
+import { ExportResponseDto } from './dto/export-response.dto';
 
-interface OcrRequestDto {
-  image: string; // Base64 image
-  expectedText?: string; // Texto esperado para calibração
-  saveForCalibration?: boolean; // Se deve salvar para calibração
-}
-
-interface OcrResponseDto {
-  success: boolean;
-  text: string;
-  confidence: number;
-  title?: string;
-  message?: string;
-  calibrationId?: string; // ID do resultado salvo para calibração
-}
-
-interface CalibrationFeedbackDto {
-  isCorrect?: boolean;
-  isAlmostCorrect?: boolean;
-  containsText?: boolean;
-  feedbackType?: 'correct' | 'almostCorrect' | 'containsText' | 'incorrect';
-  expectedText?: string;
-  corrections?: string;
-}
-
+@ApiTags('OCR')
 @Controller('ocr')
 export class OcrController {
   private readonly logger = new Logger(OcrController.name);
@@ -52,6 +42,23 @@ export class OcrController {
   ) {}
 
   @Post('process')
+  @ApiOperation({
+    summary: 'Processa imagem com OCR',
+    description: 'Extrai texto de uma imagem usando OCR (Tesseract) e opcionalmente salva para calibração',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'OCR processado com sucesso',
+    type: OcrResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Imagem não fornecida',
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Erro ao processar imagem',
+  })
   async processImage(
     @Body() body: OcrRequestDto,
   ): Promise<OcrResponseDto> {
@@ -134,7 +141,16 @@ export class OcrController {
    * Obtém estatísticas gerais de calibração
    */
   @Get('calibration/stats')
-  async getCalibrationStats() {
+  @ApiOperation({
+    summary: 'Obtém estatísticas gerais de calibração',
+    description: 'Retorna estatísticas agregadas de todos os resultados de calibração',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Estatísticas retornadas com sucesso',
+    type: CalibrationStatsDto,
+  })
+  async getCalibrationStats(): Promise<CalibrationStatsDto> {
     return this.calibrationAppService.getStats();
   }
 
@@ -142,7 +158,16 @@ export class OcrController {
    * Obtém estatísticas agrupadas por texto esperado
    */
   @Get('calibration/stats/by-text')
-  async getStatsByExpectedText() {
+  @ApiOperation({
+    summary: 'Obtém estatísticas agrupadas por texto esperado',
+    description: 'Retorna estatísticas agrupadas por cada texto esperado usado na calibração',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Estatísticas agrupadas retornadas com sucesso',
+    type: [StatsByTextDto],
+  })
+  async getStatsByExpectedText(): Promise<StatsByTextDto[]> {
     return this.calibrationAppService.getStatsByExpectedText();
   }
 
@@ -150,7 +175,16 @@ export class OcrController {
    * Obtém resultados incorretos para análise
    */
   @Get('calibration/incorrect')
-  async getIncorrectResults() {
+  @ApiOperation({
+    summary: 'Obtém resultados incorretos',
+    description: 'Retorna os últimos resultados incorretos para análise e melhoria',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Resultados incorretos retornados com sucesso',
+    type: [OcrCalibrationResult],
+  })
+  async getIncorrectResults(): Promise<OcrCalibrationResult[]> {
     return this.calibrationAppService.getIncorrectResults(20);
   }
 
@@ -158,7 +192,16 @@ export class OcrController {
    * Obtém todos os resultados de calibração
    */
   @Get('calibration/results')
-  async getAllResults() {
+  @ApiOperation({
+    summary: 'Obtém todos os resultados de calibração',
+    description: 'Retorna todos os resultados salvos para calibração',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Resultados retornados com sucesso',
+    type: [OcrCalibrationResult],
+  })
+  async getAllResults(): Promise<OcrCalibrationResult[]> {
     return this.calibrationAppService.getAllResults();
   }
 
@@ -166,10 +209,32 @@ export class OcrController {
    * Exporta dados de calibração
    */
   @Get('calibration/export')
+  @ApiOperation({
+    summary: 'Exporta dados de calibração',
+    description: 'Exporta todos os dados de calibração em formato JSON ou CSV',
+  })
+  @ApiQuery({
+    name: 'format',
+    required: false,
+    enum: ['json', 'csv'],
+    description: 'Formato de exportação',
+    example: 'json',
+  })
+  @ApiQuery({
+    name: 'filename',
+    required: false,
+    description: 'Nome do arquivo (sem extensão)',
+    example: 'calibration-export',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Dados exportados com sucesso',
+    type: ExportResponseDto,
+  })
   async exportCalibrationData(
     @Query('format') format?: 'json' | 'csv',
     @Query('filename') filename?: string,
-  ) {
+  ): Promise<ExportResponseDto> {
     const results = await this.calibrationAppService.getAllResults();
     const exportFormat = format || 'json';
     const exportFilename = filename || `calibration-export-${Date.now()}.${exportFormat}`;
@@ -192,6 +257,30 @@ export class OcrController {
    * Atualiza feedback de um resultado de calibração
    */
   @Patch('calibration/:id/feedback')
+  @ApiOperation({
+    summary: 'Atualiza feedback de calibração',
+    description: 'Atualiza o feedback de um resultado específico de calibração',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID do resultado de calibração',
+    example: '1234567890-abc123',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Feedback atualizado com sucesso',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        message: { type: 'string', example: 'Feedback atualizado com sucesso' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Erro ao atualizar feedback',
+  })
   async updateCalibrationFeedback(
     @Param('id') id: string,
     @Body() feedback: CalibrationFeedbackDto,

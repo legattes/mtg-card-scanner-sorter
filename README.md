@@ -35,6 +35,7 @@ npm run start:prod
 **Acesse:** `http://localhost:3000` - **TUDO em um único servidor!**
 - Frontend: `http://localhost:3000`
 - API: `http://localhost:3000/api`
+- **Swagger/OpenAPI Docs**: `http://localhost:3000/docs` (desenvolvimento) ou `http://localhost:3000/api/docs` (produção)
 
 ## 📱 PWA (Progressive Web App)
 
@@ -82,6 +83,7 @@ Toda a documentação está na pasta [`docs/`](./docs/):
 - [docs/DATA_LOCATION.md](./docs/DATA_LOCATION.md) - Localização dos dados
 - [docs/CACHE_FIX.md](./docs/CACHE_FIX.md) - Como resolver problemas de cache
 - [docs/TESTING.md](./docs/TESTING.md) - 🧪 Guia de testes unitários
+- [docs/API_DOCUMENTATION.md](./docs/API_DOCUMENTATION.md) - 📚 Documentação completa da API
 
 ## Estrutura do Projeto
 

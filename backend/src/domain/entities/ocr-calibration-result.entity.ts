@@ -1,21 +1,93 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
 /**
  * Entidade de domínio para resultado de calibração OCR
  */
 export type FeedbackType = 'correct' | 'almostCorrect' | 'containsText' | 'incorrect';
 
 export class OcrCalibrationResult {
+  @ApiPropertyOptional({
+    description: 'ID único do resultado',
+    example: '1234567890-abc123',
+  })
   id?: string;
+
+  @ApiProperty({
+    description: 'Texto esperado para calibração',
+    example: 'Profundezas do Desejo',
+  })
   expectedText: string;
+
+  @ApiProperty({
+    description: 'Texto extraído pelo OCR',
+    example: 'Profundezas do Desejo',
+  })
   extractedText: string;
+
+  @ApiProperty({
+    description: 'Nível de confiança do OCR (0-100)',
+    example: 95.5,
+    minimum: 0,
+    maximum: 100,
+  })
   confidence: number;
+
+  @ApiPropertyOptional({
+    description: 'Imagem em Base64 (não incluída por padrão para economizar espaço)',
+  })
   imageBase64?: string;
+
+  @ApiPropertyOptional({
+    description: 'Hash da imagem para evitar duplicatas',
+    example: 'abc123def456',
+  })
   imageHash?: string;
+
+  @ApiProperty({
+    description: 'Indica se o resultado está correto',
+    example: true,
+  })
   isCorrect: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Indica se o resultado está quase correto (>90% similaridade)',
+    example: false,
+  })
   isAlmostCorrect?: boolean; // >90% de similaridade
+
+  @ApiPropertyOptional({
+    description: 'Indica se o texto extraído contém o texto esperado',
+    example: false,
+  })
   containsText?: boolean; // Texto extraído contém o texto esperado
+
+  @ApiPropertyOptional({
+    description: 'Tipo de feedback dado',
+    enum: ['correct', 'almostCorrect', 'containsText', 'incorrect'],
+    example: 'correct',
+  })
   feedbackType?: FeedbackType; // Tipo de feedback dado
+
+  @ApiPropertyOptional({
+    description: 'Correções ou observações sobre o resultado',
+    example: 'Texto estava quase correto, apenas um caractere diferente',
+  })
   corrections?: string;
+
+  @ApiProperty({
+    description: 'Data e hora do processamento',
+    example: '2024-01-01T00:00:00.000Z',
+  })
   timestamp: Date;
+
+  @ApiPropertyOptional({
+    description: 'Parâmetros de processamento de imagem usados',
+    example: {
+      contrast: 1.6,
+      brightness: 5,
+      threshold: 128,
+    },
+  })
   parameters?: {
     contrast?: number;
     brightness?: number;

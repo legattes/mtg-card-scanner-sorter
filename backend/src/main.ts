@@ -6,6 +6,7 @@ import * as express from 'express';
 import { join } from 'path';
 import * as fs from 'fs';
 import { NotFoundExceptionFilter } from './common/filters/http-exception.filter';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -38,6 +39,25 @@ async function bootstrap() {
   if (isProduction) {
     app.setGlobalPrefix('api');
   }
+
+  // Configurar Swagger/OpenAPI
+  const config = new DocumentBuilder()
+    .setTitle('MTG Card Scanner Sorter API')
+    .setDescription('API para escanear e organizar cartas de Magic: The Gathering usando OCR')
+    .setVersion('1.0')
+    .addTag('OCR', 'Endpoints para processamento OCR de imagens')
+    .addTag('Calibration', 'Endpoints para calibração e melhoria do OCR')
+    .addTag('Health', 'Endpoints de saúde da API')
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  const swaggerPath = isProduction ? 'api/docs' : 'docs';
+  SwaggerModule.setup(swaggerPath, app, document, {
+    customSiteTitle: 'MTG Card Scanner API Docs',
+    customCss: '.swagger-ui .topbar { display: none }',
+  });
+
+  console.log(`📚 Swagger disponível em: http://localhost:${process.env.PORT || 3000}/${swaggerPath}`);
 
   // Servir arquivos estáticos do frontend (apenas em produção)
   // IMPORTANTE: Usar app.use() do NestJS que é executado ANTES das rotas serem processadas
