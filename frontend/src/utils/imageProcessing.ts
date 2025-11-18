@@ -5,9 +5,11 @@
 export interface ImageProcessingOptions {
   contrast?: number; // 0-2, padrão 1.2
   brightness?: number; // -100 a 100, padrão 10
+  gamma?: number; // 0.1-3.0, padrão 1.0 (ajuste de gamma para melhorar contraste)
   grayscale?: boolean; // padrão true
   threshold?: number; // 0-255, padrão 128 (binarização)
   sharpen?: boolean; // padrão true
+  enhanceContrast?: boolean; // padrão true (equalização adaptativa de contraste)
 }
 
 /**
@@ -20,16 +22,18 @@ export function processImageForOCR(
   const {
     contrast = 1.2,
     brightness = 10,
+    gamma = 1.0,
     grayscale = true,
     threshold,
     sharpen = true,
+    enhanceContrast = true,
   } = options;
 
   const ctx = canvas.getContext('2d');
   if (!ctx) return canvas;
 
-  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  const data = imageData.data;
+  let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  let data = imageData.data;
 
   // Aplicar filtros
   for (let i = 0; i < data.length; i += 4) {
@@ -41,6 +45,14 @@ export function processImageForOCR(
     r = Math.min(255, Math.max(0, r + brightness));
     g = Math.min(255, Math.max(0, g + brightness));
     b = Math.min(255, Math.max(0, b + brightness));
+
+    // Ajustar gamma (melhora contraste em áreas escuras/claras)
+    if (gamma !== 1.0) {
+      const gammaCorrection = 1.0 / gamma;
+      r = Math.pow(r / 255, gammaCorrection) * 255;
+      g = Math.pow(g / 255, gammaCorrection) * 255;
+      b = Math.pow(b / 255, gammaCorrection) * 255;
+    }
 
     // Ajustar contraste
     r = Math.min(255, Math.max(0, (r - 128) * contrast + 128));
@@ -65,6 +77,12 @@ export function processImageForOCR(
     data[i + 2] = b;
   }
 
+  // Aplicar equalização adaptativa de contraste (CLAHE simplificado)
+  if (enhanceContrast && !threshold && grayscale) {
+    imageData = applyContrastEnhancement(imageData);
+    data = imageData.data;
+  }
+
   // Aplicar nitidez (sharpen)
   if (sharpen && !threshold) {
     const sharpenedData = applySharpen(imageData);
@@ -74,6 +92,50 @@ export function processImageForOCR(
   }
 
   return canvas;
+}
+
+/**
+ * Aplica equalização adaptativa de contraste (CLAHE simplificado)
+ */
+function applyContrastEnhancement(imageData: ImageData): ImageData {
+  const width = imageData.width;
+  const height = imageData.height;
+  const data = imageData.data;
+  const newData = new Uint8ClampedArray(data);
+
+  // Calcular histograma
+  const histogram = new Array(256).fill(0);
+  for (let i = 0; i < data.length; i += 4) {
+    const gray = data[i]; // Já está em escala de cinza
+    histogram[gray]++;
+  }
+
+  // Calcular CDF (Cumulative Distribution Function)
+  const cdf = new Array(256);
+  cdf[0] = histogram[0];
+  for (let i = 1; i < 256; i++) {
+    cdf[i] = cdf[i - 1] + histogram[i];
+  }
+
+  // Normalizar CDF para 0-255
+  const cdfMin = cdf.find((val) => val > 0) || 0;
+  const cdfMax = cdf[255];
+  const cdfRange = cdfMax - cdfMin;
+
+  // Aplicar equalização
+  for (let i = 0; i < data.length; i += 4) {
+    const gray = data[i];
+    const normalizedCdf = cdfRange > 0 
+      ? Math.round(((cdf[gray] - cdfMin) / cdfRange) * 255)
+      : gray;
+    
+    newData[i] = normalizedCdf;
+    newData[i + 1] = normalizedCdf;
+    newData[i + 2] = normalizedCdf;
+    newData[i + 3] = data[i + 3]; // Alpha
+  }
+
+  return new ImageData(newData, width, height);
 }
 
 /**

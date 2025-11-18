@@ -8,9 +8,9 @@
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light;
-  color: #213547;
-  background-color: #f5f5f5;
+  color-scheme: dark;
+  color: rgba(212, 175, 55, 0.9);
+  background-color: #0a0a0f;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -22,6 +22,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0f0f1a 100%);
 }
 
 #root {
