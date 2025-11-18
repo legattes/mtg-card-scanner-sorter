@@ -40,6 +40,9 @@ Thumbs.db
 # NestJS
 *.tsbuildinfo
 
+# Calibration data
+data/calibration/
+
 # React/Vite
 .vite
 
