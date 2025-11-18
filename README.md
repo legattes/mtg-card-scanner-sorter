@@ -81,6 +81,7 @@ Toda a documentação está na pasta [`docs/`](./docs/):
 - [docs/HTTPS_SETUP.md](./docs/HTTPS_SETUP.md) - **Configuração HTTPS para iOS** ⚠️
 - [docs/DATA_LOCATION.md](./docs/DATA_LOCATION.md) - Localização dos dados
 - [docs/CACHE_FIX.md](./docs/CACHE_FIX.md) - Como resolver problemas de cache
+- [docs/TESTING.md](./docs/TESTING.md) - 🧪 Guia de testes unitários
 
 ## Estrutura do Projeto
 
