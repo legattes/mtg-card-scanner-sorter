@@ -1,0 +1,17 @@
+{
+  "name": "mtg-card-scanner-sorter",
+  "version": "1.0.0",
+  "description": "Projeto para escanear e organizar cartas de Magic: The Gathering usando React (frontend) e NestJS (backend).",
+  "main": "index.js",
+  "scripts": {
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "dev:backend": "cd backend && npm run start:dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build:backend": "cd backend && npm run build",
+    "build:frontend": "cd frontend && npm run build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["mtg", "magic-the-gathering", "card-scanner", "react", "nestjs"],
+  "author": "",
+  "license": "ISC"
+}
