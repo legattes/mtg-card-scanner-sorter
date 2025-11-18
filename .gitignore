@@ -43,6 +43,9 @@ Thumbs.db
 # Calibration data
 data/calibration/
 
+# Tesseract training data (opcional - descomente se não quiser versionar)
+# backend/data/tesseract/*.traineddata
+
 # React/Vite
 .vite
 

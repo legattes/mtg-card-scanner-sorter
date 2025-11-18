@@ -50,13 +50,13 @@ Veja o guia completo em: [PWA_SETUP.md](./PWA_SETUP.md)
 - ✅ Service Worker
 
 **Soluções:**
-1. **ngrok** (recomendado para testes): Veja [HTTPS_SETUP.md](./HTTPS_SETUP.md)
-2. **HTTPS local**: Configure certificados SSL (veja [HTTPS_SETUP.md](./HTTPS_SETUP.md))
+1. **ngrok** (recomendado para testes): Veja [docs/HTTPS_SETUP.md](./docs/HTTPS_SETUP.md)
+2. **HTTPS local**: Configure certificados SSL (veja [docs/HTTPS_SETUP.md](./docs/HTTPS_SETUP.md))
 3. **localhost**: Funciona apenas no mesmo dispositivo
 
 ### Resumo Rápido:
 1. Build e start do servidor
-2. Configure HTTPS (veja [HTTPS_SETUP.md](./HTTPS_SETUP.md))
+2. Configure HTTPS (veja [docs/HTTPS_SETUP.md](./docs/HTTPS_SETUP.md))
 3. Acesse do smartphone via HTTPS
 4. Instale como app nativo (iOS: Compartilhar → Adicionar à Tela de Início)
 
@@ -73,19 +73,35 @@ npm run install:all
 
 ## 📚 Documentação
 
-- [INSTALL.md](./INSTALL.md) - Instruções detalhadas de instalação
-- [ARCHITECTURE.md](./ARCHITECTURE.md) - Arquitetura do projeto
-- [PWA_SETUP.md](./PWA_SETUP.md) - Guia de configuração PWA
-- [HTTPS_SETUP.md](./HTTPS_SETUP.md) - **Configuração HTTPS para iOS** ⚠️
-- [DATA_LOCATION.md](./DATA_LOCATION.md) - Localização dos dados
+Toda a documentação está na pasta [`docs/`](./docs/):
+
+- [docs/INSTALL.md](./docs/INSTALL.md) - Instruções detalhadas de instalação
+- [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) - Arquitetura do projeto
+- [docs/PWA_SETUP.md](./docs/PWA_SETUP.md) - Guia de configuração PWA
+- [docs/HTTPS_SETUP.md](./docs/HTTPS_SETUP.md) - **Configuração HTTPS para iOS** ⚠️
+- [docs/DATA_LOCATION.md](./docs/DATA_LOCATION.md) - Localização dos dados
+- [docs/CACHE_FIX.md](./docs/CACHE_FIX.md) - Como resolver problemas de cache
 
 ## Estrutura do Projeto
 
 ```
 mtg-card-scanner-sorter/
-├── backend/          # API NestJS
-├── frontend/         # Aplicação React
-└── README.md
+├── backend/                    # API NestJS
+│   ├── data/                   # Dados do backend
+│   │   ├── calibration/       # Dados de calibração OCR
+│   │   └── tesseract/         # Arquivos de treinamento Tesseract (.traineddata)
+│   └── src/                    # Código fonte do backend
+├── frontend/                   # Aplicação React
+│   └── src/                    # Código fonte do frontend
+├── docs/                       # Documentação do projeto
+│   ├── ARCHITECTURE.md
+│   ├── CACHE_FIX.md
+│   ├── DATA_LOCATION.md
+│   ├── HTTPS_SETUP.md
+│   ├── INSTALL.md
+│   ├── PWA_SETUP.md
+│   └── REFACTORING_SUMMARY.md
+└── README.md                   # Este arquivo
 ```
 
 ## Tecnologias
